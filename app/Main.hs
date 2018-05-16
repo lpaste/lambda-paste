@@ -65,7 +65,8 @@ Language sql=language
 
 mkYesod "App" [parseRoutes|
   / NewPasteR GET POST
-  /#PasteId GET
+  /#PasteId PasteR GET
+  /raw/#PasteId RawR GET
 |]
 
 --------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ postNewPasteR = do
                 , pasteLanguage = Just (newPasteLanguage newPaste)
                 }
               pure pid)
-      redirect (GET pid)
+      redirect (PasteR pid)
     _ -> showForm formWidget enctype
 
 getLanguages :: Handler [Entity Language]
@@ -153,10 +154,20 @@ pasteForm langs =
   fmap unTextarea (areq textareaField "Content" Nothing)
 
 --------------------------------------------------------------------------------
+-- Raw content
+
+getRawR :: PasteId -> Handler Text
+getRawR pid = do
+  mpaste <- runDB (get pid)
+  case mpaste of
+    Nothing -> notFound
+    Just paste -> pure (pasteContent paste)
+
+--------------------------------------------------------------------------------
 -- Paste viewer page
 
-handleGET :: PasteId -> Handler Html
-handleGET pid = do
+getPasteR :: PasteId -> Handler Html
+getPasteR pid = do
   mpaste <- runDB (get pid)
   case mpaste of
     Nothing -> notFound
