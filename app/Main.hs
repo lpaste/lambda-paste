@@ -108,7 +108,7 @@ postNewPasteR = do
     _ -> showForm formWidget enctype
 
 getLanguages :: Handler [Entity Language]
-getLanguages = runDB (selectList [LanguageVisible ==. True] [])
+getLanguages = runDB (selectList [LanguageVisible ==. True] [Asc LanguageOrdinal])
 
 showForm :: WidgetFor App () -> Enctype -> Handler Html
 showForm formWidget enctype =
