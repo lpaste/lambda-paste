@@ -13,6 +13,7 @@ import           Control.Monad.Logger
 import           Control.Monad.Reader
 import           Data.Conduit
 import qualified Data.Conduit.List as CL
+import           Data.Maybe
 import           Data.Monoid
 import           Data.Pool
 import           Data.String
@@ -144,8 +145,8 @@ generatePasteId = do
 
 pasteForm :: [Entity Language] -> AForm Handler NewPaste
 pasteForm langs =
-  NewPaste <$> areq textField "Title" Nothing <*>
-  areq textField "Author" Nothing <*>
+  NewPaste <$> fmap (fromMaybe "No title") (aopt textField "Title" Nothing) <*>
+  fmap (fromMaybe "Anonymous Coward") (aopt textField "Author" Nothing) <*>
   areq
     (selectFieldList
        (map (\(Entity key lang) -> (languageTitle lang, key)) langs))
