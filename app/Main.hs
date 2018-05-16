@@ -15,9 +15,14 @@ import           Data.Conduit
 import qualified Data.Conduit.List as CL
 import           Data.Monoid
 import           Data.Pool
+import           Data.String
 import           Data.Text (Text)
+import qualified Data.Text as T
 import           Data.Time (getCurrentTime, UTCTime)
 import           Database.Persist.Postgresql
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+import           Text.Highlighting.Kate
 import           Yesod
 
 --------------------------------------------------------------------------------
@@ -110,12 +115,12 @@ showForm formWidget enctype =
   defaultLayout $ do
     setTitle "New paste"
     [whamlet|
-<style>
-  form > div { margin: 1em; }
-  label { padding-right: 1em; }
-  input[type=text] { width: 30em; }
-  textarea { display: block; margin-top: 1em; clear: both; width: 100%; height: 40em; font-family: monospace }
 <body>
+  <style>
+    form > div { margin: 1em; }
+    label { padding-right: 1em; }
+    input[type=text] { width: 30em; }
+    textarea { display: block; margin-top: 1em; clear: both; width: 100%; height: 40em; font-family: monospace }
   <form method=post enctype=#{enctype}>
     ^{formWidget}
     <div>
@@ -167,6 +172,11 @@ handleGET pid = do
       defaultLayout $ do
         setTitle (toHtml (pasteTitle paste))
         [whamlet|
+<style>
+  .OtherTok, .CommentTok { color: #8e908c }
+  .KeywordTok { color: #8959a8 }
+  .DataTypeTok { color: #4271ae }
+  .StringTok { color: #718c00}
 <h1>
   #{pasteTitle paste}
 <p>
@@ -174,21 +184,16 @@ handleGET pid = do
     #{pasteAuthor paste}
   #{show (pasteCreated paste)}
 <pre>
-  <code class=#{toHtml ("language-" <> language)}>
-    #{pasteContent paste}
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
-<style>
- code.hljs { background: white; }
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/haskell.min.js">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/clojure.min.js">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/erlang.min.js">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js">
-<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/elm.min.js">
-<script>
-  hljs.tabReplace = '    ';
-  hljs.initHighlightingOnLoad();
+  <code>
+    #{tokensToHtml (highlightAs (T.unpack language) (T.unpack (pasteContent paste)))}
 |]
+
+tokensToHtml :: [[(TokenType, String)]] -> H.Html
+tokensToHtml =
+  mconcat .
+  map
+    (mconcat .
+     map (\(ty, str) -> H.span H.! A.class_ (fromString (show ty)) $ toHtml str))
 
 --------------------------------------------------------------------------------
 -- Main entry point
