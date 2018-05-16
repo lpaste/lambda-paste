@@ -1,0 +1,16 @@
+FROM debian:9-slim
+MAINTAINER Chris Done
+
+# Haskell system dependencies, stack version=1.6.5
+
+RUN apt-get update && apt-get install -yq --no-install-suggests --no-install-recommends --force-yes -y librocksdb-dev  netbase git ca-certificates xz-utils build-essential curl && curl -sSL https://get.haskellstack.org/ | sh
+
+RUN stack setup --install-ghc --resolver lts-11.9
+
+RUN apt-get install -y libpq-dev pkg-config
+
+RUN stack build --resolver lts-11.9 aeson-1.2.4.0 aeson-compat-0.3.7.1 ansi-terminal-0.8.0.4 appar-0.1.4 array-0.5.2.0 async-2.1.1.1 attoparsec-0.13.2.2 attoparsec-iso8601-1.0.0.0 auto-update-0.1.4 base-4.10.1.0 base-compat-0.9.3 base64-bytestring-1.0.0.1 basement-0.0.7 binary-0.8.5.1 blaze-builder-0.4.1.0 blaze-html-0.9.0.1 blaze-markup-0.8.2.1 bsb-http-chunked-0.0.0.2 byteable-0.1.1 byteorder-1.0.4 bytestring-0.10.8.2 bytestring-builder-0.10.8.1.0 cabal-doctest-1.0.6 case-insensitive-1.2.0.11 cereal-0.5.5.0 cipher-aes-0.2.11 clientsession-0.9.1.2 colour-2.3.4 conduit-1.3.0.2 conduit-extra-1.3.0 containers-0.5.10.2 cookie-0.4.4 cpphs-1.20.8 cprng-aes-0.6.1 crypto-api-0.13.3 crypto-cipher-types-0.0.9 crypto-random-0.0.9 css-text-0.1.3.0 data-default-0.7.1.1 data-default-class-0.1.2.0 data-default-instances-containers-0.0.1 data-default-instances-dlist-0.0.1 data-default-instances-old-locale-0.0.1 deepseq-1.4.3.0 deepseq-generics-0.2.0.0 directory-1.3.0.2 dlist-0.8.0.4 easy-file-0.2.1 email-validate-2.3.2.5 entropy-0.3.8 exceptions-0.8.3 fail-4.9.0.0 fast-logger-2.4.11 filepath-1.4.1.2 foundation-0.0.20 ghc-boot-th-8.2.2 ghc-prim-0.5.1.1 hashable-1.2.7.0 haskell-src-exts-1.20.2 haskell-src-meta-0.8.0.2 http-api-data-0.3.7.2 http-date-0.0.7 http-types-0.12.1 http2-1.6.3 integer-gmp-1.0.1.0 integer-logarithms-1.0.2.1 iproute-1.7.4 lifted-base-0.2.3.12 memory-0.14.16 monad-control-1.0.2.3 monad-logger-0.3.28.5 monad-loops-0.4.3 mono-traversable-1.0.8.1 mtl-2.2.2 network-2.6.3.5 network-uri-2.6.1.0 old-locale-1.0.0.7 old-time-1.1.0.3 parsec-3.1.13.0 path-pieces-0.2.1 persistent-2.8.2 persistent-postgresql-2.8.2.0 persistent-template-2.5.4 polyparse-1.12 postgresql-libpq-0.9.4.1 postgresql-simple-0.5.3.0 pretty-1.1.3.3 primitive-0.6.3.0 process-1.6.1.0 psqueues-0.2.7.0 random-1.1 resource-pool-0.2.3.2 resourcet-1.2.1 safe-0.3.17 scientific-0.3.6.2 securemem-0.1.10 semigroups-0.18.4 setenv-0.1.1.3 shakespeare-2.0.15 silently-1.2.5 simple-sendfile-0.2.27 skein-1.0.9.4 split-0.2.3.3 stm-2.4.5.0 stm-chans-3.0.0.4 streaming-commons-0.1.19 stringsearch-0.3.6.6 syb-0.7 tagged-0.8.5 tagsoup-0.14.6 template-haskell-2.12.0.0 text-1.2.3.0 th-abstraction-0.2.6.0 th-expand-syns-0.4.4.0 th-lift-0.7.8 th-lift-instances-0.1.11 th-orphans-0.13.5 th-reify-many-0.1.8 time-1.8.0.2 time-locale-compat-0.1.1.4 transformers-0.5.2.0 transformers-base-0.4.4 transformers-compat-0.5.1.4 typed-process-0.2.2.0 unix-2.7.2.2 unix-compat-0.5.0.1 unix-time-0.3.8 unliftio-0.2.7.0 unliftio-core-0.1.1.0 unordered-containers-0.2.9.0 uri-bytestring-0.3.1.1 utf8-string-1.0.1.1 uuid-types-1.0.3 vault-0.3.1.0 vector-0.12.0.1 vector-algorithms-0.7.0.1 void-0.7.2 wai-3.2.1.2 wai-extra-3.0.22.0 wai-logger-2.3.2 warp-3.2.22 word8-0.1.3 xss-sanitize-0.3.5.7 yaml-0.8.30 yesod-1.6.0 yesod-core-1.6.5 yesod-form-1.6.1 yesod-persistent-1.6.0 zlib-0.6.2
+
+ADD . /build
+
+RUN cd /build && stack build --ghc-options='-optl-static -optl-pthread' --force-dirty
