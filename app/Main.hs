@@ -173,6 +173,9 @@ handleGET pid = do
         setTitle (toHtml (pasteTitle paste))
         [whamlet|
 <style>
+  table { font-family: monospace }
+  table td { white-space: pre }
+  td > a { color: #aaa; text-decoration: none; display: block; padding-right: 1em; }
   .OtherTok, .CommentTok { color: #8e908c }
   .KeywordTok { color: #8959a8 }
   .DataTypeTok { color: #4271ae }
@@ -183,17 +186,25 @@ handleGET pid = do
   <em>
     #{pasteAuthor paste}
   #{show (pasteCreated paste)}
-<pre>
-  <code>
-    #{tokensToHtml (highlightAs (T.unpack language) (T.unpack (pasteContent paste)))}
+<table>
+  #{tokensToHtml (highlightAs (T.unpack language) (T.unpack (pasteContent paste)))}
 |]
 
 tokensToHtml :: [[(TokenType, String)]] -> H.Html
 tokensToHtml =
   mconcat .
   map
-    (mconcat .
-     map (\(ty, str) -> H.span H.! A.class_ (fromString (show ty)) $ toHtml str))
+    (\(i, line) ->
+       H.tr H.! A.id ("line" <> fromString (show i)) $ do
+         H.td
+           (H.a H.! A.href ("#line" <> fromString (show i)) $ toHtml (show i))
+         H.td
+           (mconcat
+              (map
+                 (\(ty, str) ->
+                    H.span H.! A.class_ (fromString (show ty)) $ toHtml str)
+                 line))) .
+  zip [1 :: Int ..]
 
 --------------------------------------------------------------------------------
 -- Main entry point
