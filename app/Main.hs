@@ -204,18 +204,16 @@ getPasteR pid = do
 
 tokensToHtml :: [[(TokenType, String)]] -> H.Html
 tokensToHtml =
-  mconcat .
-  map
+  foldMap
     (\(i, line) ->
        H.tr H.! A.id ("line" <> fromString (show i)) $ do
          H.td
            (H.a H.! A.href ("#line" <> fromString (show i)) $ toHtml (show i))
          H.td
-           (mconcat
-              (map
-                 (\(ty, str) ->
-                    H.span H.! A.class_ (fromString (show ty)) $ toHtml str)
-                 line))) .
+           (foldMap
+              (\(ty, str) ->
+                 H.span H.! A.class_ (fromString (show ty)) $ toHtml str)
+              line)) .
   zip [1 :: Int ..]
 
 --------------------------------------------------------------------------------
