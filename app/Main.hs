@@ -33,6 +33,7 @@ data App = App (Pool SqlBackend)
 
 instance Yesod App where
   maximumContentLength _ _ = Just (1024 * 20)
+  makeSessionBackend _ = return Nothing
 
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
