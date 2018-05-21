@@ -19,7 +19,7 @@ executable lambda-paste
                      , monad-logger
                      , conduit
                      , mtl
-                     , highlighting-kate
+                     , skylighting
                      , blaze-html
                      , bytestring
   default-language:    Haskell2010

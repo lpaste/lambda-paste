@@ -21,12 +21,11 @@ import           Data.Monoid
 import           Data.Pool
 import           Data.String
 import           Data.Text (Text)
-import qualified Data.Text as T
 import           Data.Time (getCurrentTime, UTCTime)
 import           Database.Persist.Postgresql
+import           Skylighting
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import           Text.Highlighting.Kate
 import           Yesod
 
 --------------------------------------------------------------------------------
@@ -212,10 +211,22 @@ getPasteR pid = do
     #{pasteAuthor paste}
   #{show (pasteCreated paste)}
 <table>
-  #{tokensToHtml (highlightAs (T.unpack language) (T.unpack (pasteContent paste)))}
+  #{highlightAs language (pasteContent paste)}
 |]
 
-tokensToHtml :: [[(TokenType, String)]] -> H.Html
+highlightAs :: Text -> Text -> H.Html
+highlightAs lang src =
+  case syntaxByName defaultSyntaxMap lang of
+    Nothing -> toHtml src
+    Just syntax ->
+      case tokenize
+             TokenizerConfig {syntaxMap = defaultSyntaxMap, traceOutput = False}
+             syntax
+             src of
+        Left {} -> toHtml src
+        Right toks -> tokensToHtml toks
+
+tokensToHtml :: [[(TokenType, Text)]] -> H.Html
 tokensToHtml =
   foldMap
     (\(i, line) ->
