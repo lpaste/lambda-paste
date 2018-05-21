@@ -11,6 +11,9 @@ module Main where
 
 import           Control.Monad.Logger
 import           Control.Monad.Reader
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString as S
+import qualified Data.ByteString.Lazy.Builder as L
 import           Data.Conduit
 import qualified Data.Conduit.List as CL
 import           Data.Maybe
@@ -55,6 +58,9 @@ Paste sql=paste
   created UTCTime default=now()
   language LanguageId Maybe sqltype=integer
   deriving Show
+RawPaste sql=paste
+  content ByteString
+  deriving Show
 Language sql=language
   name Text
   title Text
@@ -69,7 +75,7 @@ Language sql=language
 mkYesod "App" [parseRoutes|
   / NewPasteR GET POST
   /#PasteId PasteR GET
-  /raw/#PasteId RawR GET
+  /raw/#RawPasteId RawR GET
 |]
 
 --------------------------------------------------------------------------------
@@ -159,12 +165,17 @@ pasteForm langs =
 --------------------------------------------------------------------------------
 -- Raw content
 
-getRawR :: PasteId -> Handler Text
+getRawR :: RawPasteId -> Handler RepPlain
 getRawR pid = do
   mpaste <- runDB (get pid)
   case mpaste of
     Nothing -> notFound
-    Just paste -> pure (pasteContent paste)
+    Just paste ->
+      pure
+        (RepPlain
+           (ContentBuilder
+              (L.byteString (rawPasteContent paste))
+              (Just (S.length (rawPasteContent paste)))))
 
 --------------------------------------------------------------------------------
 -- Paste viewer page
