@@ -210,24 +210,24 @@ getPasteR pid = do
   <em>
     #{pasteAuthor paste}
   #{show (pasteCreated paste)}
-<table>
-  #{highlightAs language (pasteContent paste)}
+#{highlightAs language (pasteContent paste)}
 |]
 
 highlightAs :: Text -> Text -> H.Html
 highlightAs lang src =
   case syntaxByName defaultSyntaxMap lang of
-    Nothing -> toHtml src
+    Nothing -> H.pre (toHtml src)
     Just syntax ->
       case tokenize
              TokenizerConfig {syntaxMap = defaultSyntaxMap, traceOutput = False}
              syntax
              src of
-        Left {} -> toHtml src
+        Left {} -> H.pre (toHtml src)
         Right toks -> tokensToHtml toks
 
 tokensToHtml :: [[(TokenType, Text)]] -> H.Html
 tokensToHtml =
+  H.table .
   foldMap
     (\(i, line) ->
        H.tr H.! A.id ("line" <> fromString (show i)) $ do
