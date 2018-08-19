@@ -199,7 +199,7 @@ getPasteR pid = do
 <style>
   table { font-family: monospace }
   table td { white-space: pre }
-  td > a { color: #aaa; text-decoration: none; display: block; padding-right: 1em; user-select: none; }
+  td > a { color: #aaa; text-decoration: none; display: block; padding-right: 1em; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
   .OtherTok, .CommentTok { color: #8e908c }
   .KeywordTok { color: #8959a8 }
   .DataTypeTok { color: #4271ae }
